@@ -10,6 +10,8 @@ const scene = new THREE.Scene();
 
 // add textureLoader
 const textureLoader = new THREE.TextureLoader();
+const cubeTextureLoader = new THREE.CubeTextureLoader();
+cubeTextureLoader.setPath("/textures/cubeMap/");
 
 // adding textures
 const sunTexture = textureLoader.load("/textures/2k_sun.jpg");
@@ -18,6 +20,20 @@ const venusTexture = textureLoader.load("/textures/2k_venus_surface.jpg");
 const earthTexture = textureLoader.load("/textures/2k_earth_daymap.jpg");
 const marsTexture = textureLoader.load("/textures/2k_mars.jpg");
 const moonTexture = textureLoader.load("/textures/2k_moon.jpg");
+const backgroundTexture = textureLoader.load(
+  "/textures/2k_stars_milky_way.jpg"
+);
+
+const backgroundCubeTexture = cubeTextureLoader.load([
+  "px.png",
+  "nx.png",
+  "py.png",
+  "ny.png",
+  "pz.png",
+  "nz.png",
+]);
+
+scene.background = backgroundCubeTexture;
 
 // add materials
 const mercuryMaterial = new THREE.MeshStandardMaterial({
@@ -127,11 +143,12 @@ const planetMeshes = planets.map((planet) => {
   return planetMesh;
 });
 
-console.log(planetMeshes);
-
 // add lights
-const ambientLight = new THREE.AmbientLight(new THREE.Color("white"), 0.1);
+const ambientLight = new THREE.AmbientLight(new THREE.Color("white"), 0.09);
 scene.add(ambientLight);
+
+const pointLight = new THREE.PointLight(new THREE.Color("white"), 500);
+scene.add(pointLight);
 
 // initialize the camera
 const camera = new THREE.PerspectiveCamera(
@@ -164,6 +181,20 @@ window.addEventListener("resize", () => {
 
 //render loop
 const renderloop = () => {
+  planetMeshes.forEach((planet, index) => {
+    planet.rotation.y += planets[index].speed;
+    planet.position.x = Math.sin(planet.rotation.y) * planets[index].distance;
+    planet.position.z = Math.cos(planet.rotation.y) * planets[index].distance;
+
+    planet.children.forEach((moon, moonIndex) => {
+      moon.rotation.y += planets[index].moons[moonIndex].speed;
+      moon.position.x =
+        Math.sin(moon.rotation.y) * planets[index].moons[moonIndex].distance;
+      moon.position.z =
+        Math.cos(moon.rotation.y) * planets[index].moons[moonIndex].distance;
+    });
+  });
+
   controls.update();
   renderer.render(scene, camera);
   window.requestAnimationFrame(renderloop);
