@@ -102,6 +102,37 @@ const planets = [
   },
 ];
 
+const createPlanet = (planet) => {
+  const planetMesh = new THREE.Mesh(sphereGeometry, planet.material);
+  planetMesh.scale.setScalar(planet.radius);
+  planetMesh.position.x = planet.distance;
+  return planetMesh;
+};
+
+const createMoon = (moon) => {
+  const moonMesh = new THREE.Mesh(sphereGeometry, moonMaterial);
+  moonMesh.scale.setScalar(moon.radius);
+  moonMesh.position.x = moon.distance;
+  return moonMesh;
+};
+
+const planetMeshes = planets.map((planet) => {
+  const planetMesh = createPlanet(planet);
+  scene.add(planetMesh);
+
+  planet.moons.forEach((moon) => {
+    const moonMesh = createMoon(moon);
+    planetMesh.add(moonMesh);
+  });
+  return planetMesh;
+});
+
+console.log(planetMeshes);
+
+// add lights
+const ambientLight = new THREE.AmbientLight(new THREE.Color("white"), 0.1);
+scene.add(ambientLight);
+
 // initialize the camera
 const camera = new THREE.PerspectiveCamera(
   35,
